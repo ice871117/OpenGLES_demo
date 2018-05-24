@@ -30,6 +30,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private var mGLSurfaceView: GLSurfaceView? = null
+    private var mRenderer: SimpleRenderer? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -41,7 +42,8 @@ class MainActivity : AppCompatActivity() {
 
         mGLSurfaceView = findViewById(R.id.gl_surface_view) as GLSurfaceView
         mGLSurfaceView?.setEGLContextClientVersion(2)
-        mGLSurfaceView?.setRenderer(SimpleRenderer())
+        mRenderer = SimpleRenderer()
+        mGLSurfaceView?.setRenderer(mRenderer)
         mGLSurfaceView?.visibility = View.VISIBLE
         mGLSurfaceView?.renderMode = GLSurfaceView.RENDERMODE_CONTINUOUSLY
     }
@@ -54,6 +56,11 @@ class MainActivity : AppCompatActivity() {
     override fun onPause() {
         super.onPause()
         mGLSurfaceView?.onPause()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        mRenderer?.destroy()
     }
 
     inner class SimpleRenderer : GLSurfaceView.Renderer {
@@ -215,6 +222,10 @@ class MainActivity : AppCompatActivity() {
             GLES20.glEnableVertexAttribArray(mTexCoordHandle)
             GLES20.glVertexAttribPointer(mTexCoordHandle, 2, GLES20.GL_FLOAT, false,
                     0, mTextures)
+        }
+
+        fun destroy() {
+            GLES20.glDeleteTextures(1, intArrayOf(mTexName), 0)
         }
 
         private fun loadShader(type: Int, shaderCode: String): Int {
